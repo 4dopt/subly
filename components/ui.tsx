@@ -3,7 +3,7 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 
 // --- Types ---
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'icon';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'icon' | 'outline' | 'glass';
   size?: 'sm' | 'md' | 'lg' | 'icon';
   isLoading?: boolean;
 }
@@ -18,20 +18,22 @@ export const Button: React.FC<ButtonProps> = ({
   isLoading,
   ...props 
 }) => {
-  const baseStyles = "relative font-semibold rounded-xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100";
+  const baseStyles = "relative font-bold rounded-full flex items-center justify-center transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 z-10";
   
   const variants = {
-    primary: "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30 border border-transparent hover:brightness-110",
-    secondary: "bg-dark-800 border border-dark-700 text-slate-200 hover:bg-dark-700",
-    ghost: "bg-transparent text-slate-400 hover:text-white hover:bg-white/5",
-    icon: "bg-dark-800/50 backdrop-blur-md text-white border border-white/10 hover:bg-dark-700/50"
+    primary: "bg-white text-black hover:bg-gray-200",
+    secondary: "bg-zinc-800 text-white hover:bg-zinc-700",
+    ghost: "bg-transparent text-zinc-400 hover:text-white",
+    icon: "bg-zinc-800 text-white hover:bg-zinc-700",
+    outline: "bg-transparent border border-zinc-700 text-zinc-300 hover:border-white hover:text-white",
+    glass: "bg-white/10 backdrop-blur-md text-white border border-white/10 hover:bg-white/20"
   };
 
   const sizes = {
     sm: "px-3 py-1.5 text-xs",
-    md: "px-5 py-3 text-sm",
+    md: "px-6 py-3 text-sm",
     lg: "px-8 py-4 text-base w-full",
-    icon: "w-10 h-10 p-2 rounded-full"
+    icon: "w-11 h-11 p-2.5 rounded-full"
   };
 
   return (
@@ -57,7 +59,7 @@ export const Card: React.FC<CardProps> = ({ children, className = '', onClick })
   <motion.div 
     whileTap={onClick ? { scale: 0.98 } : {}}
     onClick={onClick}
-    className={`bg-dark-800 border border-dark-700/50 rounded-2xl overflow-hidden ${className}`}
+    className={`bg-zinc-900 rounded-[2rem] overflow-hidden ${className}`}
   >
     {children}
   </motion.div>
@@ -70,12 +72,12 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const Input: React.FC<InputProps> = ({ icon: Icon, className = '', ...props }) => (
   <div className={`relative flex items-center ${className}`}>
     {Icon && (
-      <div className="absolute left-4 text-slate-400 pointer-events-none">
-        <Icon size={18} />
+      <div className="absolute left-5 text-zinc-400 pointer-events-none">
+        <Icon size={20} />
       </div>
     )}
     <input 
-      className={`w-full bg-dark-800 border border-dark-700 text-slate-100 rounded-xl py-3.5 ${Icon ? 'pl-11' : 'pl-4'} pr-4 placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors`}
+      className={`w-full bg-zinc-900 border border-zinc-800 text-white rounded-2xl py-4 ${Icon ? 'pl-12' : 'pl-5'} pr-5 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-all duration-300`}
       {...props}
     />
   </div>
@@ -89,33 +91,35 @@ interface SafeAreaProps {
 }
 
 export const SafeArea: React.FC<SafeAreaProps> = ({ children, className = '', top = true, bottom = true }) => (
-  <div className={`flex flex-col flex-1 w-full max-w-md mx-auto h-full bg-dark-950 relative overflow-hidden shadow-2xl ${className}`}>
+  <div className={`flex flex-col flex-1 w-full max-w-md mx-auto h-full relative overflow-hidden shadow-2xl ${className ? className : 'bg-black text-white'}`}>
     {/* Status Bar Spacer */}
-    {top && <div className="h-[env(safe-area-inset-top,20px)] w-full shrink-0 bg-transparent z-50" />}
+    {top && <div className="h-[env(safe-area-inset-top,20px)] w-full shrink-0 bg-transparent z-50 pointer-events-none" />}
     
     <div className="flex-1 flex flex-col relative overflow-hidden">
         {children}
     </div>
 
     {/* Home Indicator Spacer */}
-    {bottom && <div className="h-[env(safe-area-inset-bottom,20px)] w-full shrink-0 bg-transparent z-50" />}
+    {bottom && <div className="h-[env(safe-area-inset-bottom,20px)] w-full shrink-0 bg-transparent z-50 pointer-events-none" />}
   </div>
 );
 
 interface BadgeProps {
   children?: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'accent';
+  variant?: 'primary' | 'secondary' | 'accent' | 'rose' | 'dark';
 }
 
 export const Badge: React.FC<BadgeProps> = ({ children, variant = 'primary' }) => {
     const styles = {
-        primary: "bg-primary-500/20 text-primary-400 border-primary-500/30",
-        secondary: "bg-slate-800 text-slate-400 border-slate-700",
-        accent: "bg-secondary-500/20 text-secondary-400 border-secondary-500/30"
+        primary: "bg-white text-black",
+        secondary: "bg-zinc-800 text-zinc-400",
+        accent: "bg-blue-500 text-white",
+        rose: "bg-rose-500 text-white",
+        dark: "bg-black/50 text-white border border-white/20"
     };
     
     return (
-        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${styles[variant]}`}>
+        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${styles[variant]}`}>
             {children}
         </span>
     );

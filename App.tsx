@@ -1,203 +1,258 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Compass, Library, User, Search, Play, Pause, X } from 'lucide-react';
+import { Home, Search, LayoutGrid, Zap, AlignLeft, Bell, Cog, Disc, User, Heart, Music, Mic, Plus } from 'lucide-react';
 import { SplashScreen } from './screens/SplashScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { PlayerScreen } from './screens/PlayerScreen';
-import { Card, Input, SafeArea, Badge, Button } from './components/ui';
-import { ScreenName, TabName, Track, Category } from './types';
-import { CATEGORIES, TRENDING_TRACKS } from './constants';
+import { PlaylistScreen } from './screens/PlaylistScreen';
+import { ProfileScreen } from './screens/ProfileScreen';
+import { SearchScreen } from './screens/SearchScreen';
+import { LibraryScreen } from './screens/LibraryScreen';
+import { SafeArea } from './components/ui';
+import { ScreenName, TabName, Track, GridItem } from './types';
+import { LIVE_ARTISTS, GRID_ITEMS, MOCK_USER_STATS, TARGET_TRACK, MOCK_CREATOR_PROFILE } from './constants';
 
 export default function App() {
   const [screen, setScreen] = useState<ScreenName>('splash');
   const [activeTab, setActiveTab] = useState<TabName>('home');
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<GridItem | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   
   // Navigation Helper
   const navigate = (scr: ScreenName) => setScreen(scr);
 
+  // Handle Card Click -> Open Playlist
+  const openPlaylist = (item: GridItem) => {
+    setSelectedPlaylist(item);
+    setScreen('playlist');
+  };
+
   // Play Helper
   const playTrack = (track: Track) => {
-    setCurrentTrack(track);
+    // If it's The Weeknd mix card, use the Target Track to show the specific design
+    if (track.title.includes('Weeknd')) {
+        setCurrentTrack(TARGET_TRACK);
+    } else {
+        setCurrentTrack(track);
+    }
     setIsPlaying(true);
     setIsPlayerOpen(true);
   };
 
-  // --- SUB-COMPONENTS (IN-FILE FOR SIMPLICITY) ---
+  // --- SUB-COMPONENTS ---
 
   const Header = () => (
-    <div className="px-6 py-4 flex items-center justify-between bg-dark-950/80 backdrop-blur-md sticky top-0 z-30">
-      <div className="flex items-center gap-2">
-         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-secondary-400 flex items-center justify-center text-white font-bold text-xs">S</div>
-         <span className="font-display font-bold text-xl tracking-tight">Sublyme</span>
-      </div>
-      <button onClick={() => navigate('profile')} className="w-9 h-9 rounded-full bg-dark-800 border border-dark-700 overflow-hidden">
-        <img src="https://i.pravatar.cc/150?u=sublyme" alt="Profile" className="w-full h-full object-cover" />
-      </button>
+    <div className="px-6 py-4 flex items-center justify-between bg-black sticky top-0 z-30">
+       <div className="w-6" /> 
     </div>
   );
 
   const BottomNav = () => (
-    <div className="absolute bottom-0 left-0 right-0 bg-dark-900/90 backdrop-blur-lg border-t border-dark-700/50 pb-[env(safe-area-inset-bottom,20px)] pt-2 px-6 flex justify-between items-center z-40">
-      {[
-        { id: 'home', icon: Home, label: 'Home' },
-        { id: 'explore', icon: Compass, label: 'Explore' },
-        { id: 'library', icon: Library, label: 'Library' },
-        { id: 'profile', icon: User, label: 'Profile' }
-      ].map((item) => (
-        <button 
-          key={item.id}
-          onClick={() => setActiveTab(item.id as TabName)}
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors ${activeTab === item.id ? 'text-primary-400' : 'text-slate-500 hover:text-slate-300'}`}
-        >
-          <item.icon size={24} strokeWidth={activeTab === item.id ? 2.5 : 2} />
-          <span className="text-[10px] font-medium">{item.label}</span>
-        </button>
-      ))}
-    </div>
-  );
+      <div className="absolute bottom-0 left-0 right-0 z-40 p-4 pb-8 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-none">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/5 shadow-2xl rounded-[2.5rem] h-20 flex justify-between items-center px-2 relative overflow-hidden pointer-events-auto">
+             
+             {/* Background glow for active item */}
+             {activeTab === 'home' && (
+                 <div className="absolute left-[12%] top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 blur-xl rounded-full pointer-events-none" />
+             )}
 
-  const MiniPlayer = () => {
-    if (!currentTrack) return null;
-    return (
-      <motion.div 
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        className="absolute bottom-[90px] left-4 right-4 bg-dark-800/95 backdrop-blur-md border border-white/10 rounded-2xl p-2 pr-4 shadow-xl z-30 flex items-center gap-3"
-        onClick={() => setIsPlayerOpen(true)}
-      >
-        <img src={currentTrack.imageUrl} alt={currentTrack.title} className="w-10 h-10 rounded-lg object-cover" />
-        <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-bold text-white truncate">{currentTrack.title}</h4>
-          <p className="text-xs text-slate-400 truncate">{currentTrack.artist}</p>
-        </div>
-        <button 
-            onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}
-            className="w-10 h-10 rounded-full bg-white text-dark-950 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
-        >
-            {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" />}
-        </button>
-      </motion.div>
-    );
-  };
+             <button 
+                onClick={() => setActiveTab('home')}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-full transition-all ${activeTab === 'home' ? 'text-white' : 'text-zinc-500'}`}
+             >
+                <div className={`p-3 rounded-full ${activeTab === 'home' ? 'bg-white/20' : 'bg-transparent'}`}>
+                    <Home size={24} fill={activeTab === 'home' ? "currentColor" : "none"} />
+                </div>
+                {activeTab === 'home' && <span className="text-[10px] font-medium">Home</span>}
+             </button>
+
+             {/* Search Tab - Custom styling when active to match the design request slightly (adding the pink accent concept) */}
+             <button 
+                onClick={() => setActiveTab('search')} 
+                className={`flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-full transition-all ${activeTab === 'search' ? 'text-rose-500' : 'text-zinc-500'}`}
+             >
+                <div className={`p-3 rounded-full ${activeTab === 'search' ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.5)]' : 'bg-transparent'}`}>
+                    {activeTab === 'search' ? <Plus size={24} /> : <Search size={24} />}
+                </div>
+                 {activeTab === 'search' && <span className="text-[10px] font-medium">Search</span>}
+             </button>
+
+             <button 
+                onClick={() => setActiveTab('grid')} 
+                className={`flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-full transition-all ${activeTab === 'grid' ? 'text-white' : 'text-zinc-500'}`}
+             >
+                <div className={`p-3 rounded-full ${activeTab === 'grid' ? 'bg-white/20' : 'bg-transparent'}`}>
+                    <LayoutGrid size={24} fill={activeTab === 'grid' ? "currentColor" : "none"} />
+                </div>
+                {activeTab === 'grid' && <span className="text-[10px] font-medium">Library</span>}
+             </button>
+
+             <button onClick={() => setActiveTab('activity')} className="flex-1 flex items-center justify-center text-zinc-500 hover:text-zinc-300">
+                <Zap size={24} />
+             </button>
+          </div>
+      </div>
+  );
 
   // --- SCREEN CONTENTS ---
   
-  const HomeScreen = () => (
+  const HomeScreen = () => {
+    // Gradients for live avatars
+    const avatarGradients = [
+        'from-pink-400 to-rose-500',
+        'from-purple-400 to-indigo-500',
+        'from-cyan-400 to-blue-500',
+        'from-emerald-400 to-teal-500',
+        'from-amber-400 to-orange-500'
+    ];
+
+    return (
     <div className="flex flex-col pb-32">
-       <Header />
-       <div className="px-6 mb-8">
-         <div onClick={() => navigate('search')}>
-            <Input icon={Search} placeholder="What do you want to manifest?" readOnly className="pointer-events-none" />
-         </div>
-       </div>
-
-       {/* Hero Card */}
-       <div className="px-6 mb-8">
-         <div className="relative w-full aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl shadow-purple-900/20 group cursor-pointer" onClick={() => playTrack(TRENDING_TRACKS[0])}>
-           <img src="https://picsum.photos/800/600?random=hero" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Featured" />
-           <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-950/40 to-transparent" />
-           <div className="absolute bottom-0 left-0 p-6 w-full">
-              <Badge variant="accent">Featured</Badge>
-              <h2 className="text-2xl font-display font-bold text-white mt-2 mb-1">Quantum Reality Shift</h2>
-              <p className="text-slate-300 text-sm mb-4 line-clamp-2">Reprogram your subconscious for limitless possibilities while you sleep.</p>
-              <div className="flex items-center gap-3">
-                  <Button size="sm" className="rounded-full pl-3 pr-4">
-                     <Play size={16} fill="currentColor" className="mr-2" /> Play Now
-                  </Button>
-                  <span className="text-xs text-slate-400 font-medium bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">45 min</span>
-              </div>
+       {/* Top Creators */}
+       <div className="mt-4 mb-8">
+           <h2 className="text-xl font-display font-bold text-white px-6 mb-4">Top creators</h2>
+           <div className="flex gap-4 overflow-x-auto px-6 pb-2 no-scrollbar">
+                {LIVE_ARTISTS.map((artist, index) => (
+                    <div 
+                        key={artist.id} 
+                        onClick={() => navigate('profile')}
+                        className="flex flex-col items-center gap-2 flex-shrink-0 cursor-pointer group"
+                    >
+                        <div className="relative p-[3px] rounded-full bg-gradient-to-tr from-pink-500 via-purple-500 to-indigo-500 group-hover:scale-105 transition-transform">
+                             <div className={`w-[72px] h-[72px] rounded-full border-[3px] border-black overflow-hidden bg-gradient-to-br ${avatarGradients[index % avatarGradients.length]} flex items-center justify-center`}>
+                                <User size={32} className="text-white/60" />
+                             </div>
+                        </div>
+                        <div className="text-center">
+                            <h4 className="text-sm font-bold text-white leading-tight">{artist.name}</h4>
+                            <span className="text-[10px] font-medium text-zinc-400">{artist.viewers}</span>
+                        </div>
+                    </div>
+                ))}
            </div>
-         </div>
        </div>
 
-       {/* Categories */}
-       <div className="px-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-             <h3 className="text-lg font-bold text-white">Explore Categories</h3>
-             <button className="text-primary-400 text-xs font-bold uppercase tracking-wider">See All</button>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-             {CATEGORIES.slice(0, 4).map((cat) => (
-                <Card key={cat.id} className="p-4 flex flex-col items-start gap-3 bg-dark-800/50 hover:bg-dark-800 transition-colors" onClick={() => navigate('category')}>
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-white shadow-lg`}>
-                        {/* Icons would be dynamic here, simplified for demo */}
-                        <span className="text-lg font-bold">{cat.name[0]}</span>
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-white text-sm">{cat.name}</h4>
-                        <p className="text-xs text-slate-500">{cat.trackCount} tracks</p>
-                    </div>
-                </Card>
-             ))}
-          </div>
+       {/* You may like & Filters - Updated to match Profile Chip styles */}
+       <div className="px-6 mb-6">
+            <h2 className="text-xl font-display font-bold text-white mb-4">You may like</h2>
+            <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar">
+                <button className="px-6 py-2.5 rounded-2xl bg-white text-black font-bold text-sm whitespace-nowrap shadow-glow">All</button>
+                <button className="px-6 py-2.5 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold text-sm whitespace-nowrap hover:bg-zinc-800 hover:text-white transition-colors">Rock</button>
+                <button className="px-6 py-2.5 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold text-sm whitespace-nowrap hover:bg-zinc-800 hover:text-white transition-colors">Hip-Hop</button>
+                <button className="px-6 py-2.5 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold text-sm whitespace-nowrap hover:bg-zinc-800 hover:text-white transition-colors">K-pop</button>
+                <button className="px-6 py-2.5 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold text-sm whitespace-nowrap hover:bg-zinc-800 hover:text-white transition-colors">Classics</button>
+            </div>
        </div>
 
-       {/* Trending */}
-       <div className="px-6">
-          <h3 className="text-lg font-bold text-white mb-4">Trending Now</h3>
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 no-scrollbar">
-             {TRENDING_TRACKS.map((track) => (
-                 <div key={track.id} className="flex-shrink-0 w-36 group cursor-pointer" onClick={() => playTrack(track)}>
-                    <div className="w-36 h-36 rounded-2xl overflow-hidden mb-3 relative">
-                       <img src={track.imageUrl} alt={track.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black">
-                             <Play size={18} fill="currentColor" className="ml-0.5" />
-                          </div>
-                       </div>
-                    </div>
-                    <h4 className="text-sm font-bold text-slate-200 truncate">{track.title}</h4>
-                    <p className="text-xs text-slate-500 truncate">{track.artist}</p>
+       {/* Masonry Grid */}
+       <div className="px-6 grid grid-cols-2 gap-4">
+            {/* Left Column */}
+            <div className="flex flex-col gap-4">
+                {/* Blue Mix Card (Tall) */}
+                <div 
+                    onClick={() => openPlaylist({id: 'm1', title: 'The Weeknd', subtitle: 'Mix', type: 'mix', color: 'from-sky-400 to-blue-600', artistImage: ''})}
+                    className="aspect-[4/5] w-full rounded-[2rem] bg-gradient-to-b from-sky-400 to-blue-600 relative overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                >
+                     <div className="absolute top-4 left-4 p-2 bg-white/20 rounded-2xl backdrop-blur-md">
+                        <Cog size={14} className="text-white opacity-80" />
+                     </div>
+                     
+                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                        <h3 className="text-2xl font-display font-bold text-white mb-1">The Weeknd</h3>
+                        <span className="text-white/80 text-sm font-medium">Mix</span>
+                     </div>
+                     
+                     {/* Circles at bottom */}
+                     <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center">
+                         <div className="flex -space-x-3">
+                             <div className="w-10 h-10 rounded-full border-2 border-blue-500 overflow-hidden bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center">
+                                 <Disc size={16} className="text-white/40" />
+                             </div>
+                             <div className="w-12 h-12 rounded-full border-2 border-blue-500 overflow-hidden bg-gradient-to-br from-indigo-300 to-indigo-500 z-10 -mt-2 flex items-center justify-center">
+                                 <Disc size={20} className="text-white/40" />
+                             </div>
+                             <div className="w-10 h-10 rounded-full border-2 border-blue-500 overflow-hidden bg-gradient-to-br from-sky-300 to-sky-500 flex items-center justify-center">
+                                 <Disc size={16} className="text-white/40" />
+                             </div>
+                         </div>
+                     </div>
+                </div>
+
+                {/* Red Liked Songs Card (Short) */}
+                 <div 
+                    onClick={() => openPlaylist({id: 'g2', title: 'Post Malone', subtitle: 'Liked Songs', type: 'liked', color: 'from-red-500 to-red-700', artistImage: ''})}
+                    className="aspect-square w-full rounded-[2rem] bg-gradient-to-b from-red-500 to-red-700 relative overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                >
+                     <div className="absolute top-4 left-4 p-2 bg-white/20 rounded-2xl backdrop-blur-md z-20">
+                        <Cog size={14} className="text-white opacity-80" />
+                     </div>
+                     <div className="absolute top-6 left-0 right-0 text-center z-20">
+                         <h3 className="font-bold text-white text-lg">Post Malone</h3>
+                         <span className="text-white/80 text-xs">Liked Songs</span>
+                     </div>
+                     {/* Placeholder Icon Graphic */}
+                     <div className="absolute bottom-[-20px] right-[-20px] opacity-20 transform rotate-12">
+                         <Heart size={140} fill="currentColor" className="text-black" />
+                     </div>
                  </div>
-             ))}
-          </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="flex flex-col gap-4">
+                {/* Pink Liked Songs Card (Short) */}
+                <div 
+                    onClick={() => openPlaylist({id: 'g3', title: 'Post Malone', subtitle: 'Liked Songs', type: 'liked', color: 'from-pink-500 to-rose-600', artistImage: ''})}
+                    className="aspect-square w-full rounded-[2rem] bg-gradient-to-b from-pink-500 to-rose-600 relative overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                >
+                     <div className="absolute top-4 left-4 p-2 bg-white/20 rounded-2xl backdrop-blur-md z-20">
+                        <Cog size={14} className="text-white opacity-80" />
+                     </div>
+                     <div className="absolute top-6 left-0 right-0 text-center z-20">
+                         <h3 className="font-bold text-white text-lg">Post Malone</h3>
+                         <span className="text-white/80 text-xs">Liked Songs</span>
+                     </div>
+                     {/* Placeholder Icon Graphic */}
+                     <div className="absolute bottom-[-10px] left-[-10px] opacity-20 transform -rotate-12">
+                         <Music size={140} fill="currentColor" className="text-black" />
+                     </div>
+                 </div>
+
+                 {/* Purple Mix Card (Tall) */}
+                 <div 
+                    onClick={() => openPlaylist({id: 'g4', title: 'Dua Lipa', subtitle: 'Mix', type: 'mix', color: 'from-fuchsia-500 to-purple-600', artistImage: ''})}
+                    className="aspect-[4/5] w-full rounded-[2rem] bg-gradient-to-b from-fuchsia-500 to-purple-600 relative overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                >
+                     <div className="absolute top-4 left-4 p-2 bg-white/20 rounded-2xl backdrop-blur-md">
+                        <Cog size={14} className="text-white opacity-80" />
+                     </div>
+                     
+                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                        <h3 className="text-2xl font-display font-bold text-white mb-1">Dua Lipa</h3>
+                        <span className="text-white/80 text-sm font-medium">Mix</span>
+                     </div>
+                     
+                     {/* Circles at bottom */}
+                     <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center">
+                         <div className="flex -space-x-3">
+                             <div className="w-10 h-10 rounded-full border-2 border-purple-500 overflow-hidden bg-gradient-to-br from-fuchsia-300 to-fuchsia-500 flex items-center justify-center">
+                                 <Disc size={16} className="text-white/40" />
+                             </div>
+                             <div className="w-12 h-12 rounded-full border-2 border-purple-500 overflow-hidden bg-gradient-to-br from-purple-300 to-purple-500 z-10 -mt-2 flex items-center justify-center">
+                                 <Disc size={20} className="text-white/40" />
+                             </div>
+                             <div className="w-10 h-10 rounded-full border-2 border-purple-500 overflow-hidden bg-gradient-to-br from-pink-300 to-pink-500 flex items-center justify-center">
+                                 <Disc size={16} className="text-white/40" />
+                             </div>
+                         </div>
+                     </div>
+                </div>
+            </div>
        </div>
     </div>
-  );
-
-  const ExploreScreen = () => (
-      <div className="flex flex-col p-6 pb-32">
-          <h1 className="text-3xl font-display font-bold mb-6">Explore</h1>
-          <Input icon={Search} placeholder="Search categories, moods..." className="mb-6" />
-          <div className="grid grid-cols-2 gap-4">
-              {CATEGORIES.map((cat) => (
-                <div key={cat.id} className="aspect-[4/3] rounded-2xl relative overflow-hidden group cursor-pointer">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-80 group-hover:opacity-100 transition-opacity`} />
-                    <div className="absolute inset-0 p-4 flex flex-col justify-end">
-                        <h3 className="text-white font-bold text-lg">{cat.name}</h3>
-                        <p className="text-white/80 text-xs">{cat.trackCount} tracks</p>
-                    </div>
-                </div>
-              ))}
-          </div>
-      </div>
-  );
-
-  const LibraryScreen = () => (
-      <div className="flex flex-col p-6 pb-32">
-          <h1 className="text-3xl font-display font-bold mb-6">Library</h1>
-          <div className="flex gap-6 border-b border-dark-700 mb-6">
-              <button className="pb-3 border-b-2 border-primary-500 text-white font-medium">Favorites</button>
-              <button className="pb-3 border-b-2 border-transparent text-slate-500 font-medium hover:text-slate-300">Playlists</button>
-              <button className="pb-3 border-b-2 border-transparent text-slate-500 font-medium hover:text-slate-300">History</button>
-          </div>
-          <div className="space-y-4">
-              {TRENDING_TRACKS.slice(0,3).map(track => (
-                  <div key={track.id} className="flex items-center gap-4 bg-dark-800/50 p-3 rounded-xl border border-transparent hover:border-dark-700 cursor-pointer" onClick={() => playTrack(track)}>
-                      <img src={track.imageUrl} className="w-14 h-14 rounded-lg object-cover" />
-                      <div className="flex-1">
-                          <h4 className="font-bold text-white">{track.title}</h4>
-                          <p className="text-xs text-slate-400">{track.artist}</p>
-                      </div>
-                      <button className="p-2 text-primary-400"><Play size={20} fill="currentColor" /></button>
-                  </div>
-              ))}
-          </div>
-      </div>
-  );
+    );
+  };
 
   // --- RENDER LOGIC ---
 
@@ -208,52 +263,41 @@ export default function App() {
   if (screen === 'onboarding') {
     return <OnboardingScreen onComplete={() => setScreen('home')} />;
   }
+  
+  if (screen === 'playlist') {
+      return (
+        <PlaylistScreen 
+            playlistItem={selectedPlaylist} 
+            onBack={() => setScreen('home')} 
+            onPlayTrack={playTrack} 
+        />
+      );
+  }
 
-  if (screen === 'player' || isPlayerOpen) {
-      // Handled by conditional rendering below for modal effect
+  if (screen === 'profile') {
+      return (
+        <ProfileScreen 
+            profile={MOCK_CREATOR_PROFILE} 
+            onBack={() => setScreen('home')} 
+            onPlayTrack={playTrack}
+        />
+      );
   }
 
   return (
     <SafeArea>
        {/* Main Content Area */}
-       <div className="flex-1 overflow-y-auto no-scrollbar bg-dark-950">
-          {activeTab === 'home' && <HomeScreen />}
-          {activeTab === 'explore' && <ExploreScreen />}
-          {activeTab === 'library' && <LibraryScreen />}
-          {activeTab === 'profile' && (
-              <div className="p-6 flex flex-col items-center justify-center h-full text-center">
-                  <div className="w-24 h-24 rounded-full bg-dark-800 mb-4 overflow-hidden border-2 border-primary-500">
-                      <img src="https://i.pravatar.cc/150?u=sublyme" className="w-full h-full object-cover" />
-                  </div>
-                  <h2 className="text-2xl font-bold">Alex Doe</h2>
-                  <p className="text-slate-500 mb-8">Premium Member</p>
-                  <Button variant="secondary" className="w-full mb-3">Account Settings</Button>
-                  <Button variant="ghost" className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/10">Log Out</Button>
-              </div>
-          )}
+       <div className="flex-1 overflow-y-auto no-scrollbar bg-black relative">
+          <AnimatePresence mode="wait">
+            {activeTab === 'home' && <HomeScreen key="home" />}
+            {activeTab === 'search' && <SearchScreen key="search" />}
+            {activeTab === 'grid' && <LibraryScreen key="library" />}
+            {activeTab === 'activity' && <div className="p-10 text-center text-zinc-500 mt-20">Activity</div>}
+          </AnimatePresence>
        </div>
-
-       {/* Components Layered on Top */}
-       <MiniPlayer />
+       
        <BottomNav />
        
-       {/* Search Overlay (Simplified) */}
-       {screen === 'search' && (
-         <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="absolute inset-0 z-50 bg-dark-950 flex flex-col"
-         >
-             <div className="p-4 flex items-center gap-3 border-b border-dark-800">
-                 <button onClick={() => setScreen('home')}><X className="text-slate-400" /></button>
-                 <Input autoFocus placeholder="Search..." className="flex-1" />
-             </div>
-             <div className="p-6 flex-1 flex flex-col items-center justify-center text-slate-500">
-                 <Search size={48} className="mb-4 opacity-20" />
-                 <p>Search specifically for...</p>
-             </div>
-         </motion.div>
-       )}
-
        {/* Full Screen Player Modal */}
        {isPlayerOpen && currentTrack && (
          <PlayerScreen 

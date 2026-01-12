@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Heart, MoreHorizontal, Play, Pause, SkipBack, SkipForward, Volume2, Plus, Share2 } from 'lucide-react';
+import { ChevronDown, Heart, MoreVertical, Play, Pause, SkipBack, SkipForward, Repeat, Disc } from 'lucide-react';
 import { Track } from '../types';
-import { Button, SafeArea } from '../components/ui';
+import { SafeArea } from '../components/ui';
 
 interface Props {
     track: Track;
@@ -14,6 +14,7 @@ interface Props {
 export const PlayerScreen: React.FC<Props> = ({ track, onClose, isPlaying, onTogglePlay }) => {
     const [progress, setProgress] = useState(30);
     const [liked, setLiked] = useState(false);
+    const [viewMode, setViewMode] = useState<'song' | 'video'>('song');
 
     // Simulate progress
     useEffect(() => {
@@ -30,118 +31,126 @@ export const PlayerScreen: React.FC<Props> = ({ track, onClose, isPlaying, onTog
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                transition={{ type: "spring", damping: 30, stiffness: 250 }}
                 className="fixed inset-0 z-50 flex items-end justify-center pointer-events-none"
             >
-                <SafeArea className="h-full bg-dark-900 pointer-events-auto rounded-t-3xl overflow-hidden border-t border-white/10">
-                    {/* Background Blur Image */}
-                    <div className="absolute inset-0 z-0">
-                        <img src={track.imageUrl} alt="" className="w-full h-full object-cover opacity-20 blur-3xl" />
-                        <div className="absolute inset-0 bg-gradient-to-b from-dark-950/50 via-dark-950/80 to-dark-950" />
+                {/* Specific Dark Red Gradient Background */}
+                <SafeArea className="h-full pointer-events-auto rounded-none overflow-hidden flex flex-col bg-gradient-to-b from-[#450a0a] to-[#2a0505]">
+                    
+                    {/* Header */}
+                    <div className="px-6 py-6 flex items-center justify-between z-10">
+                        <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors backdrop-blur-sm">
+                            <ChevronDown size={24} />
+                        </button>
+                        
+                        {/* Segmented Control */}
+                        <div className="flex bg-black/30 backdrop-blur-md rounded-full p-1">
+                            <button 
+                                onClick={() => setViewMode('song')}
+                                className={`px-6 py-1.5 rounded-full text-sm font-semibold transition-all ${viewMode === 'song' ? 'bg-white/20 text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
+                            >
+                                Song
+                            </button>
+                            <button 
+                                onClick={() => setViewMode('video')}
+                                className={`px-6 py-1.5 rounded-full text-sm font-semibold transition-all ${viewMode === 'video' ? 'bg-white/20 text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
+                            >
+                                Video
+                            </button>
+                        </div>
+
+                        <button className="w-10 h-10 flex items-center justify-center bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors backdrop-blur-sm">
+                            <MoreVertical size={20} />
+                        </button>
                     </div>
 
-                    <div className="relative z-10 flex flex-col h-full p-6">
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-8 pt-4">
-                            <button onClick={onClose} className="p-2 -ml-2 text-slate-300 hover:text-white rounded-full hover:bg-white/10">
-                                <ChevronDown size={28} />
-                            </button>
-                            <span className="text-xs font-bold tracking-widest uppercase text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/5">
-                                Now Playing
-                            </span>
-                            <button className="p-2 -mr-2 text-slate-300 hover:text-white rounded-full hover:bg-white/10">
-                                <MoreHorizontal size={24} />
-                            </button>
-                        </div>
+                    <div className="flex-1 flex flex-col px-6 pb-8 overflow-y-auto no-scrollbar relative">
+                        
+                        {/* Artwork Area */}
+                        <div className="flex-1 flex items-center justify-center relative my-4">
+                            {/* Side Peeks (Decoration) */}
+                            <div className="absolute left-[-85%] w-full h-[80%] bg-zinc-800 rounded-[2rem] opacity-30 scale-90" />
+                            <div className="absolute right-[-85%] w-full h-[80%] bg-zinc-800 rounded-[2rem] opacity-30 scale-90" />
 
-                        {/* Artwork */}
-                        <div className="flex-1 flex items-center justify-center mb-10">
-                            <div className="relative w-full aspect-square max-w-[320px] rounded-3xl overflow-hidden shadow-2xl shadow-primary-500/20 border border-white/10">
-                                <img src={track.imageUrl} alt={track.title} className="w-full h-full object-cover" />
-                                {/* Visualizer Overlay */}
-                                {isPlaying && (
-                                    <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/20">
-                                        {[1, 2, 3, 4, 5].map((bar) => (
-                                            <motion.div 
-                                                key={bar}
-                                                animate={{ height: [20, 60, 30, 80, 40] }}
-                                                transition={{ 
-                                                    repeat: Infinity, 
-                                                    duration: 1.5, 
-                                                    delay: bar * 0.1,
-                                                    ease: "easeInOut"
-                                                }}
-                                                className="w-2 bg-white/80 rounded-full"
-                                            />
-                                        ))}
+                            <div className="relative w-full aspect-square max-h-[350px] max-w-[350px]">
+                                {/* Artwork Shadow/Glow */}
+                                <div className="absolute inset-0 bg-red-500/20 blur-3xl rounded-full scale-110" />
+                                
+                                <div className="w-full h-full rounded-[2rem] overflow-hidden relative border border-white/10 shadow-2xl z-10">
+                                    {/* Placeholder Gradient Album Art */}
+                                    <div className="w-full h-full bg-gradient-to-br from-orange-500 via-red-500 to-rose-600 flex items-center justify-center">
+                                         <div className="text-white/30">
+                                            <Disc size={80} strokeWidth={1} />
+                                         </div>
                                     </div>
-                                )}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Info */}
-                        <div className="flex items-end justify-between mb-8">
-                            <div>
-                                <h2 className="text-2xl font-display font-bold text-white mb-1 leading-tight">{track.title}</h2>
-                                <p className="text-lg text-slate-400">{track.artist}</p>
-                            </div>
-                            <div className="flex gap-4">
-                                <button onClick={() => setLiked(!liked)} className={`p-2 rounded-full transition-colors ${liked ? 'text-rose-500 bg-rose-500/10' : 'text-slate-400 hover:text-white'}`}>
-                                    <Heart size={24} fill={liked ? "currentColor" : "none"} />
-                                </button>
-                                <button className="p-2 text-slate-400 hover:text-white rounded-full">
-                                    <Share2 size={24} />
-                                </button>
-                            </div>
+                        {/* Title & Icons Row */}
+                        <div className="flex items-center justify-between mt-6 mb-8">
+                             <button className="p-3 text-white/50 hover:text-white transition-colors">
+                                <Repeat size={24} />
+                             </button>
+
+                             <div className="flex flex-col items-center text-center">
+                                <h2 className="text-2xl font-display font-bold text-white mb-1 tracking-wide">{track.title}</h2>
+                                <p className="text-white/70 font-medium text-lg">{track.artist}</p>
+                             </div>
+
+                             <button onClick={() => setLiked(!liked)} className="p-3 text-white transition-colors">
+                                <Heart size={24} fill={liked ? "white" : "none"} />
+                             </button>
                         </div>
 
-                        {/* Progress */}
-                        <div className="mb-10 group">
-                            <div className="relative h-1.5 bg-dark-700 rounded-full overflow-hidden mb-2 cursor-pointer group-hover:h-2 transition-all">
-                                <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary-400 to-secondary-400" style={{ width: `${progress}%` }} />
+                        {/* Standard Progress Bar */}
+                        <div className="w-full px-2 mb-2 group cursor-pointer relative">
+                            {/* Track */}
+                            <div className="w-full h-1.5 bg-white/20 rounded-full relative overflow-hidden">
+                                {/* Fill */}
+                                <div 
+                                    className="h-full bg-white rounded-full relative" 
+                                    style={{ width: `${progress}%` }} 
+                                />
                             </div>
-                            <div className="flex justify-between text-xs font-medium text-slate-500">
-                                <span>{Math.floor((progress / 100) * 600 / 60)}:{String(Math.floor((progress / 100) * 600 % 60)).padStart(2, '0')}</span>
-                                <span>{track.duration}</span>
-                            </div>
+                            {/* Thumb (only visible on hover/active or subtle always) */}
+                            <div 
+                                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg ml-2"
+                                style={{ left: `calc(${progress}% - 8px)` }}
+                            />
+                        </div>
+
+                        {/* TimeStamps */}
+                        <div className="flex justify-between text-xs font-medium text-white/60 mb-12 px-2">
+                            <span>2:48</span>
+                            <span>3:52</span>
                         </div>
 
                         {/* Controls */}
-                        <div className="flex items-center justify-between mb-10">
-                            <button className="text-slate-400 hover:text-white transition-colors">
-                                <Volume2 size={24} />
+                        <div className="flex items-center justify-center gap-10 mb-8">
+                            <button className="text-white hover:scale-110 transition-transform">
+                                <SkipBack size={36} fill="currentColor" />
                             </button>
                             
-                            <div className="flex items-center gap-6">
-                                <button className="text-white hover:text-primary-300 transition-colors">
-                                    <SkipBack size={32} fill="currentColor" />
-                                </button>
-                                <button 
-                                    onClick={onTogglePlay}
-                                    className="w-20 h-20 rounded-full bg-white text-dark-950 flex items-center justify-center shadow-lg shadow-white/10 hover:scale-105 active:scale-95 transition-all"
-                                >
-                                    {isPlaying ? (
-                                        <Pause size={32} fill="currentColor" />
-                                    ) : (
-                                        <Play size={32} fill="currentColor" className="ml-1" />
-                                    )}
-                                </button>
-                                <button className="text-white hover:text-primary-300 transition-colors">
-                                    <SkipForward size={32} fill="currentColor" />
-                                </button>
-                            </div>
+                            <motion.button 
+                                whileTap={{ scale: 0.95 }}
+                                onClick={onTogglePlay}
+                                className="w-20 h-20 rounded-full bg-white/10 text-white flex items-center justify-center backdrop-blur-md border border-white/10 shadow-lg hover:bg-white/20 transition-all"
+                            >
+                                {isPlaying ? (
+                                    <Pause size={32} fill="currentColor" />
+                                ) : (
+                                    <Play size={32} fill="currentColor" className="ml-1" />
+                                )}
+                            </motion.button>
 
-                            <button className="text-slate-400 hover:text-white transition-colors">
-                                <Plus size={28} />
+                            <button className="text-white hover:scale-110 transition-transform">
+                                <SkipForward size={36} fill="currentColor" />
                             </button>
                         </div>
                         
-                        <div className="mt-auto pb-4">
-                             <div className="flex items-center justify-center gap-2 text-xs text-primary-300 bg-primary-500/10 py-2 px-4 rounded-full border border-primary-500/20 w-fit mx-auto">
-                                <div className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-pulse" />
-                                Playing in background enabled
-                             </div>
-                        </div>
+                        {/* Bottom Spacer */}
+                        <div className="h-4" />
                     </div>
                 </SafeArea>
             </motion.div>
